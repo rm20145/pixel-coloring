@@ -1,0 +1,32 @@
+export const APP_WIDTH = 800;
+export const APP_HEIGHT = 600;
+export const APP_PADDING = 20;
+
+export const WORLD_WIDTH = 1000;
+export const WORLD_HEIGHT = 1000;
+
+export const LEVELS_PANEL_WIDTH = APP_WIDTH / 4;
+export const LEVELS_PANEL_BUTTONS_MARGIN = 10;
+
+export const PANEL_PADDING = 10;
+export const PANEL_BODY_OFFSET = 50;
+
+export const TEXT_BUTTON_HEIGHT = 40;
+export const TEXT_BUTTON_WIDTH = 200;
+export const TEXT_BUTTON_PADDING_X = 10;
+export const TEXT_BUTTON_PADDING_Y = 10;
+
+export const BORDER_WIDTH = 2;
+export const FIELD_BUTTONS_BORDER_WIDTH = 1;
+
+export const COLOR_BUTTON_SIZE = 32;
+export const COLOR_BUTTON_PADDING_Y = 3;
+
+export const COLORS_PANEL_WIDTH = APP_WIDTH - APP_PADDING * 3 - LEVELS_PANEL_WIDTH;
+export const COLORS_PANEL_HEIGHT = PANEL_BODY_OFFSET + COLOR_BUTTON_SIZE * 2 + PANEL_PADDING;
+export const COLORS_COLUMNS = Math.floor((COLORS_PANEL_WIDTH - PANEL_PADDING * 2) / COLOR_BUTTON_SIZE);
+
+export const LEVELS_PANEL_X = APP_WIDTH - APP_PADDING - LEVELS_PANEL_WIDTH;
+export const LEVELS_PANEL_Y = APP_PADDING * 3 + TEXT_BUTTON_HEIGHT * 2;
+
+export const CUSTOM_LEVEL_SIZE = 32;
