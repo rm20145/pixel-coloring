@@ -64,6 +64,7 @@ class GameStore {
         const level = {
             id: uuidv4(),
             name: `Уровень ${this.nextCustomLevelNumber}`,
+            abbr: `Ур. ${this.nextCustomLevelNumber}`,
             matrix,
             colors: [...customLevelColors],
         };
@@ -101,6 +102,18 @@ class GameStore {
     }
     @computed get currentLevelProgress() {
         return this.getLevelProgress(this.currentLevel);
+    }
+    @computed get currentLevelPixelsCount() {
+        return this.currentLevel.matrix.length * this.currentLevel.matrix[0].length;
+    }
+    @computed get currentLevelRowLength() {
+        return this.currentLevel.matrix[0].length;
+    }
+    @computed get currentLevelColorsMap() {
+        return this.currentLevel.colors.reduce((colors, color) => ({
+            ...colors,
+            [color.id]: color,
+        }), {});
     }
 
     getLevelProgress(level) {

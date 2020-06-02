@@ -1,25 +1,19 @@
 import * as PIXI from 'pixi.js'
-import {
-    BORDER_WIDTH,
-    TEXT_BUTTON_HEIGHT,
-    TEXT_BUTTON_PADDING_X,
-    TEXT_BUTTON_PADDING_Y,
-    TEXT_BUTTON_WIDTH
-} from "../constants/dimensions";
+import layoutStore from '../store/layout-store';
 import {TEXT_BUTTON_LABEL} from "../constants/fonts";
 import {ACCENT_COLOR, MAIN_COLOR, SECOND_COLOR} from "../constants/colors";
 
 const DEFAULT_RECT = {
     x: 0,
     y: 0,
-    height: TEXT_BUTTON_HEIGHT,
-    width: TEXT_BUTTON_WIDTH,
+    height: layoutStore.textButtonHeight,
+    width: layoutStore.textButtonWidth,
 };
 const DEFAULT_OPTIONS = {
-    paddingX: TEXT_BUTTON_PADDING_X,
-    paddingY: TEXT_BUTTON_PADDING_Y,
+    paddingX: layoutStore.textButtonPaddingX,
+    paddingY: layoutStore.textButtonPaddingY,
     font: TEXT_BUTTON_LABEL,
-    borderWidth: BORDER_WIDTH,
+    borderWidth: layoutStore.borderWidth,
     borderColor: ACCENT_COLOR,
     activeBorderColor: SECOND_COLOR,
     backgroundColor: MAIN_COLOR,
@@ -53,10 +47,12 @@ class TextButton {
         this._graphics = new PIXI.Graphics();
         this.component.addChild(this._graphics);
 
-        this._labelText = new PIXI.Text(label, this._options.font);
-        this._labelText.x = this._options.paddingX;
-        this._labelText.y = this._options.paddingY;
-        this.component.addChild(this._labelText);
+        if (label) {
+            this._labelText = new PIXI.Text(label, this._options.font);
+            this._labelText.x = this._options.paddingX;
+            this._labelText.y = this._options.paddingY;
+            this.component.addChild(this._labelText);
+        }
 
         this.component.interactive = true;
         this.component.buttonMode = true;
@@ -82,7 +78,9 @@ class TextButton {
         this._graphics.drawRect(0, 0, this._rect.width, this._rect.height);
         this._graphics.endFill();
 
-        this._labelText.alpha = this._disabled ? .5 : 1;
+        if (this._labelText) {
+            this._labelText.alpha = this._disabled ? .5 : 1;
+        }
     }
 
     set active(value) {
@@ -94,7 +92,9 @@ class TextButton {
         this.render();
     }
     set label(value) {
-        this._labelText.text = value;
+        if (this._labelText) {
+            this._labelText.text = value;
+        }
     }
     set backgroundColor(value) {
         this._backgroundColor = value;

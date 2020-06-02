@@ -28,6 +28,7 @@ export const customLevelMatrixFromCanvasData = (data, dw, dh) => {
             matrix[i].push(nearestCustomColor.id);
         }
     }
+
     return matrix;
 };
 export const zipBinaryMatrix = matrix => {

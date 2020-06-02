@@ -1,19 +1,16 @@
 import TextButton from "./TextButton";
-import {
-    COLOR_BUTTON_PADDING_Y,
-    COLOR_BUTTON_SIZE,
-} from "../constants/dimensions";
 import {COLOR_BUTTON_LABEL} from "../constants/fonts";
+import layoutStore from '../store/layout-store';
 
 const DEFAULT_RECT = {
     x: 0,
     y: 0,
-    height: COLOR_BUTTON_SIZE,
-    width: COLOR_BUTTON_SIZE,
+    height: layoutStore.colorButtonSize,
+    width: layoutStore.colorButtonSize,
 };
 const DEFAULT_OPTIONS = {
     paddingX: 0,
-    paddingY: COLOR_BUTTON_PADDING_Y,
+    paddingY: layoutStore.colorButtonPaddingY,
     font: COLOR_BUTTON_LABEL,
 };
 
@@ -27,7 +24,7 @@ class ColorButton extends TextButton {
             {...DEFAULT_OPTIONS, ...options}
         );
         this._labelText.anchor.set(.5, .5);
-        this._labelText.position.set(COLOR_BUTTON_SIZE / 2, COLOR_BUTTON_SIZE / 2);
+        this._labelText.position.set(layoutStore.colorButtonSize / 2, layoutStore.colorButtonSize / 2);
     }
 }
 

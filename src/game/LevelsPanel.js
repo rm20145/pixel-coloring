@@ -1,12 +1,5 @@
 import Panel from "./Panel";
-import {
-    APP_HEIGHT,
-    APP_PADDING,
-    LEVELS_PANEL_BUTTONS_MARGIN,
-    LEVELS_PANEL_WIDTH, LEVELS_PANEL_X, LEVELS_PANEL_Y,
-    PANEL_PADDING,
-    TEXT_BUTTON_HEIGHT
-} from "../constants/dimensions";
+import layoutStore from '../store/layout-store';
 import {LEVELS_LABEL} from "../constants/texts";
 import TextButton from "./TextButton";
 import gameStore, {levelIsCustom} from '../store/game-store';
@@ -16,10 +9,10 @@ class LevelsPanel extends Panel {
 
     constructor() {
         super(LEVELS_LABEL, {
-            x: LEVELS_PANEL_X,
-            y: LEVELS_PANEL_Y,
-            width: LEVELS_PANEL_WIDTH,
-            height: APP_HEIGHT - APP_PADDING * 4 - TEXT_BUTTON_HEIGHT * 2,
+            x: layoutStore.levelsPanelX,
+            y: layoutStore.levelsPanelY,
+            width: layoutStore.levelsPanelWidth,
+            height: layoutStore.levelsPanelHeight,
         });
         this.renderButtons();
 
@@ -39,14 +32,36 @@ class LevelsPanel extends Panel {
             const isCustom = levelIsCustom(level);
             const isCompleted = gameStore.levelIsComplete(level);
 
-            const buttonWidth = isCustom
-                ? LEVELS_PANEL_WIDTH - PANEL_PADDING * 3 - TEXT_BUTTON_HEIGHT
-                : LEVELS_PANEL_WIDTH - PANEL_PADDING * 2;
+            let buttonWidth;
+            if (layoutStore.layoutType === 'desktop') {
+                buttonWidth = isCustom
+                    ? layoutStore.levelsPanelWidth - layoutStore.panelPadding * 3 - layoutStore.textButtonHeight
+                    : layoutStore.levelsPanelWidth - layoutStore.panelPadding * 2;
+            } else {
+                buttonWidth = layoutStore.levelsPanelWidth - layoutStore.panelPadding * 2;
+                buttonWidth /= layoutStore.levelsPanelMobileColumns;
+                if (isCustom) {
+                    buttonWidth -= layoutStore.textButtonHeight;
+                }
+            }
+
+            const x = layoutStore.layoutType === 'desktop'
+                ? 0
+                : Math.floor(index / layoutStore.levelsPanelMobileColumns) * ((layoutStore.levelsPanelWidth - layoutStore.panelPadding * 2) / layoutStore.levelsPanelMobileColumns);
+            const y = layoutStore.layoutType === 'desktop'
+                ? index * (layoutStore.textButtonHeight + layoutStore.levelsPanelButtonsMargin)
+                : (index % layoutStore.levelsPanelMobileColumns) * layoutStore.textButtonHeight;
+
+            const label = layoutStore.layoutType === 'mobile' && level.abbr
+                ? `${level.abbr}${isCompleted ? ' ✔️' : ''}`
+                : `${level.name}${isCompleted ? ' ✔️' : ''}`;
+
             const button = new TextButton(
-                `${level.name}${isCompleted ? ' ✔️' : ''}`,
+                label,
                 {
                     width: buttonWidth,
-                    y: index * (TEXT_BUTTON_HEIGHT + LEVELS_PANEL_BUTTONS_MARGIN),
+                    x,
+                    y,
                 },
                 () => gameStore.setCurrentLevel(level.id),
                 gameStore.currentLevelId === level.id
@@ -59,12 +74,21 @@ class LevelsPanel extends Panel {
             )
 
             if (isCustom) {
+                const x = layoutStore.layoutType === 'desktop'
+                    ? layoutStore.levelsPanelWidth - layoutStore.panelPadding * 2 - layoutStore.textButtonHeight
+                    : Math.floor(index / layoutStore.levelsPanelMobileColumns)
+                        * ((layoutStore.levelsPanelWidth - layoutStore.panelPadding * 2) / layoutStore.levelsPanelMobileColumns)
+                        + buttonWidth;
+                const y = layoutStore.layoutType === 'desktop'
+                    ? index * (layoutStore.textButtonHeight + layoutStore.levelsPanelButtonsMargin)
+                    : (index % layoutStore.levelsPanelMobileColumns) * layoutStore.textButtonHeight;
+
                 const removeButton = new TextButton(
                     '❌',
                     {
-                        width: TEXT_BUTTON_HEIGHT,
-                        x: LEVELS_PANEL_WIDTH - PANEL_PADDING * 2 - TEXT_BUTTON_HEIGHT,
-                        y: index * (TEXT_BUTTON_HEIGHT + LEVELS_PANEL_BUTTONS_MARGIN),
+                        width: layoutStore.textButtonHeight,
+                        x,
+                        y,
                     },
                     () => gameStore.removeLevel(level.id),
                     false,

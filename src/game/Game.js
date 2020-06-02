@@ -1,9 +1,5 @@
 import * as PIXI from 'pixi.js'
-import {
-    APP_HEIGHT,
-    APP_WIDTH,
-    BORDER_WIDTH,
-} from "../constants/dimensions";
+import layoutStore from '../store/layout-store';
 import {ACCENT_COLOR, MAIN_COLOR} from "../constants/colors";
 import LevelsPanel from "./LevelsPanel";
 import ColorsPanel from "./ColorsPanel";
@@ -17,25 +13,26 @@ import Alert from "./Alert";
 class Game {
 
     init(container) {
+        layoutStore.init();
         gameStore.init();
         this.createApp(container);
     }
 
     createApp(container) {
         const app = new PIXI.Application({
-            width: APP_WIDTH,
-            height: APP_HEIGHT,
+            width: layoutStore.appWidth,
+            height: layoutStore.appHeight,
             backgroundColor: MAIN_COLOR,
         });
 
-        app.view.style.borderWidth = BORDER_WIDTH + 'px';
+        app.view.style.borderWidth = layoutStore.borderWidth + 'px';
         app.view.style.borderColor = hexToCss(ACCENT_COLOR);
         app.view.style.borderStyle = 'solid';
         container.current.appendChild(app.view);
 
         app.stage.addChild(new LevelViewport(app).component);
         app.stage.addChild(new SaveGameButton().component);
-        app.stage.addChild(new CreateLevelButton().component);
+        app.stage.addChild(new CreateLevelButton(app).component);
         app.stage.addChild(new LevelsPanel().component);
         app.stage.addChild(new ColorsPanel().component);
         app.stage.addChild(new Alert().component);

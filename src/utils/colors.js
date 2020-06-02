@@ -1,4 +1,4 @@
-export const hexToCss = color => '#' + color.toString(16);
+export const hexToCss = color => '#' + color.toString(16).padStart(6, '0');
 
 export const greyscale = color => 
     (((((((color >> 16) & 0xff)*76) + (((color >> 8) & 0xff)*150) + ((color & 0xff)*29)) >> 8)) << 16) |
