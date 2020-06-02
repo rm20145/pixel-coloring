@@ -6,8 +6,9 @@ import {reaction} from "mobx";
 import * as PIXI from 'pixi.js'
 import {ACCENT_COLOR, MAIN_COLOR} from "../constants/colors";
 
-const DRAG_TIMEOUT = 200;
-const NUMBERS_PADDING = 150;
+const NUMBERS_UPDATE_DELAY = 200;           // ms
+const NUMBERS_AREA_PADDING = 150;           // px
+const MAX_WORLD_SIZE_WITH_NUMBERS = 1100;   // px
 
 class LevelViewport {
 
@@ -69,56 +70,58 @@ class LevelViewport {
     }
 
     initEvents() {
-        let drag = false;
+        let dragColoring = false;
         this._graphicsContainer.on('pointerdown', event => {
-            const point = event.data.getLocalPosition(this._graphicsContainer);
-            const pointI = Math.floor(point.y / layoutStore.colorButtonSize);
-            const pointJ = Math.floor(point.x / layoutStore.colorButtonSize);
-
-            if (!gameStore.currentLevelProgress.matrix[pointI][pointJ]
-                && gameStore.currentColorId === gameStore.currentLevel.matrix[pointI][pointJ]) {
-
-                gameStore.updateCurrentLevelProgress(pointI, pointJ, 1);
-
-                const graphicsIndex = Math.floor((pointI * gameStore.currentLevel.matrix[0].length + pointJ) / layoutStore.pixelsPerGraphics);
-                this.renderGraphics(graphicsIndex);
-                this.renderNumbers();
-
+            if (this.handleColoring(event)) {
                 event.stopPropagation();
-                drag = true;
+                dragColoring = true;
             }
         });
         this._graphicsContainer.on('pointermove', event => {
-            if (drag) {
-                const point = event.data.getLocalPosition(this._graphicsContainer);
-                const pointI = Math.floor(point.y / layoutStore.colorButtonSize);
-                const pointJ = Math.floor(point.x / layoutStore.colorButtonSize);
-
-                if (!gameStore.currentLevelProgress.matrix[pointI][pointJ]
-                    && gameStore.currentColorId === gameStore.currentLevel.matrix[pointI][pointJ]) {
-
-                    gameStore.updateCurrentLevelProgress(pointI, pointJ, 1);
-
-                    const graphicsIndex = Math.floor((pointI * gameStore.currentLevel.matrix[0].length + pointJ) / layoutStore.pixelsPerGraphics);
-                    this.renderGraphics(graphicsIndex);
-                    this.renderNumbers();
-                }
+            if (dragColoring) {
+                this.handleColoring(event);
             }
         });
-        this._graphicsContainer.on('pointerup', event => {
-            drag = false;
+        this._graphicsContainer.on('pointerup', () => {
+            dragColoring = false;
         });
 
-        let updateTimout;
+        let numbersDelayTimeout;
         this._viewport.on('moved-end', () => {
-            updateTimout && clearInterval(updateTimout);
-            updateTimout = setTimeout(this.renderNumbers.bind(this), DRAG_TIMEOUT);
+            numbersDelayTimeout && clearInterval(numbersDelayTimeout);
+            numbersDelayTimeout = setTimeout(this.renderNumbers.bind(this), NUMBERS_UPDATE_DELAY);
         });
 
         reaction(
             () => gameStore.currentLevelId,
             this.render.bind(this),
         );
+    }
+
+    handleColoring(event) {
+        const point = event.data.getLocalPosition(this._graphicsContainer);
+        const pointI = Math.floor(point.y / layoutStore.colorButtonSize);
+        const pointJ = Math.floor(point.x / layoutStore.colorButtonSize);
+        const pointIsInRange =
+            pointI >= 0 &&
+            pointJ >= 0 &&
+            pointI < gameStore.currentLevelProgress.matrix.length &&
+            pointJ < gameStore.currentLevelProgress.matrix[0].length;
+
+        if (pointIsInRange
+            &&!gameStore.currentLevelProgress.matrix[pointI][pointJ]
+            && gameStore.currentColorId === gameStore.currentLevel.matrix[pointI][pointJ]) {
+
+            gameStore.updateCurrentLevelProgress(pointI, pointJ, 1);
+
+            const graphicsIndex = Math.floor((pointI * gameStore.currentLevel.matrix[0].length + pointJ) / layoutStore.pixelsPerGraphics);
+            this.renderGraphics(graphicsIndex);
+            this.renderNumbers();
+
+            return true;
+        }
+
+        return false;
     }
 
     render() {
@@ -182,17 +185,17 @@ class LevelViewport {
 
         const bounds = this._viewport.getVisibleBounds();
 
-        const x = bounds.x - NUMBERS_PADDING;
-        const y = bounds.y - NUMBERS_PADDING;
-        const width = bounds.width + 2 * NUMBERS_PADDING;
-        const height = bounds.width + 2 * NUMBERS_PADDING;
+        const x = bounds.x - NUMBERS_AREA_PADDING;
+        const y = bounds.y - NUMBERS_AREA_PADDING;
+        const width = bounds.width + 2 * NUMBERS_AREA_PADDING;
+        const height = bounds.width + 2 * NUMBERS_AREA_PADDING;
 
         const fieldWidth = gameStore.currentLevel.matrix[0].length * layoutStore.colorButtonSize;
         const fieldHeight = gameStore.currentLevel.matrix.length * layoutStore.colorButtonSize;
         const rW = x > 0 ? Math.min(fieldWidth - x, width) : Math.min(width + x, fieldWidth);
         const rH = y > 0 ? Math.min(fieldHeight - y, height) : Math.min(height + y, fieldHeight);
 
-        if (rW > 0 && rH > 0 && width < 1000 && height < 1000) {
+        if (rW > 0 && rH > 0 && width < MAX_WORLD_SIZE_WITH_NUMBERS && height < MAX_WORLD_SIZE_WITH_NUMBERS) {
             const rX = x < 0 ? 0 : x;
             const rY = y < 0 ? 0 : y;
             const nI = Math.floor(rY / layoutStore.colorButtonSize);
